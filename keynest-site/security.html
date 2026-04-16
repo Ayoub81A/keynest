@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security — KeyNest</title>
+<meta name="description" content="How KeyNest protects your passwords with AES-256-GCM encryption, PBKDF2 key derivation, and a zero-knowledge architecture.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+
+/* PAGE HERO */
+.page-hero {
+  padding: 80px 0 64px;
+  text-align: center;
+  background: var(--text);
+}
+.page-hero .section-label { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+.page-hero .section-title { color: #fff; margin-bottom: 14px; }
+.page-hero .section-sub   { color: rgba(255,255,255,0.5); margin: 0 auto; }
+
+/* TRUST BADGES */
+.trust-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 36px;
+}
+.trust-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 100px;
+  padding: 8px 16px;
+  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7);
+}
+.trust-badge svg { width: 14px; height: 14px; stroke-width: 2; color: #4ade80; flex-shrink: 0; }
+
+/* SECTION NAV */
+.section-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 64px;
+  z-index: 90;
+}
+.section-nav-inner {
+  max-width: 1100px; margin: 0 auto; padding: 0 24px;
+  display: flex; gap: 0; overflow-x: auto;
+}
+.section-nav a {
+  padding: 16px 20px; font-size: 13px; font-weight: 500; color: var(--text3);
+  white-space: nowrap; border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.section-nav a:hover { color: var(--text2); }
+.section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ENCRYPTION FLOW */
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+.flow::before {
+  content: '';
+  position: absolute;
+  left: 27px; top: 40px; bottom: 40px;
+  width: 2px;
+  background: var(--border);
+}
+.flow-step {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 24px;
+  align-items: start;
+  padding: 0 0 36px;
+  position: relative;
+  z-index: 1;
+}
+.flow-step:last-child { padding-bottom: 0; }
+.flow-num {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--border);
+  display: grid; place-items: center;
+  font-family: 'Lora', serif; font-size: 18px; font-weight: 600; color: var(--text);
+  flex-shrink: 0;
+  transition: border-color 0.2s, background 0.2s;
+}
+.flow-step:hover .flow-num { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
+.flow-content { padding-top: 12px; }
+.flow-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+.flow-desc  { font-size: 14px; color: var(--text2); line-height: 1.7; }
+.flow-code  {
+  display: inline-block; margin-top: 10px;
+  font-family: 'Outfit', monospace; font-size: 12px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 14px;
+  color: var(--accent); letter-spacing: 0.3px;
+}
+
+/* TECH TABLE */
+.tech-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 14px;
+}
+.tech-table th {
+  text-align: left; padding: 12px 16px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--text3);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+}
+.tech-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.tech-table tr:last-child td { border-bottom: none; }
+.tech-table td:first-child { font-weight: 600; color: var(--text); width: 200px; }
+.tech-table td:last-child { color: var(--text2); line-height: 1.6; }
+.tech-pill {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 2px 9px; border-radius: 100px; margin-right: 6px;
+}
+.tech-pill.blue   { background: var(--accent-bg); color: var(--accent); }
+.tech-pill.green  { background: #dcfce7; color: #15803d; }
+
+/* COMPARISON TABLE */
+.compare-table { width: 100%; border-collapse: collapse; }
+.compare-table th { padding: 14px 18px; text-align: left; font-size: 13px; font-weight: 600; border-bottom: 2px solid var(--border); }
+.compare-table th:first-child { color: var(--text3); }
+.compare-table th.highlight { color: var(--accent); background: var(--accent-bg); border-radius: 12px 12px 0 0; }
+.compare-table td { padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text2); }
+.compare-table td.highlight { background: rgba(28,78,216,0.04); }
+.compare-table tr:last-child td { border-bottom: none; }
+.check { color: var(--success); font-weight: 700; }
+.cross { color: var(--danger); }
+.partial { color: var(--warn); }
+
+/* FAQ */
+.faq-item {
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+}
+.faq-item:first-child { border-top: 1px solid var(--border); }
+.faq-q {
+  font-size: 16px; font-weight: 600; margin-bottom: 10px;
+  display: flex; align-items: start; justify-content: space-between; gap: 16px;
+  cursor: pointer;
+}
+.faq-q svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--text3); margin-top: 2px; }
+.faq-a { font-size: 14px; color: var(--text2); line-height: 1.75; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .flow::before { display: none; }
+  .flow-step { grid-template-columns: 1fr; gap: 12px; }
+  .flow-num { width: 42px; height: 42px; font-size: 15px; }
+  .tech-table td:first-child { width: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+        </svg>
+      </div>
+      <span class="nav-logo-text">Key<em>Nest</em></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="features.html">Features</a></li>
+      <li><a href="security.html" class="active">Security</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="features.html" class="btn btn-outline btn-sm">Features</a>
+      <a href="../keynest/index.html" class="btn btn-dark btn-sm">Open App</a>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <span class="section-label">Security</span>
+    <h1 class="section-title">We can't read your passwords.<br>That's the point.</h1>
+    <p class="section-sub">KeyNest uses a zero-knowledge architecture. Your encryption key is derived from your password in your browser and never transmitted to or stored by the server.</p>
+    <div class="trust-row">
+      <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>AES-256-GCM Encryption</div>
+      <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>PBKDF2 · 310,000 iterations</div>
+      <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Zero-knowledge architecture</div>
+      <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Open source — auditable</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION NAV -->
+<div class="section-nav">
+  <div class="section-nav-inner">
+    <a href="#encryption" class="active">Encryption</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#tech">Tech Specs</a>
+    <a href="#comparison">Comparison</a>
+    <a href="#faq">FAQ</a>
+  </div>
+</div>
+
+<!-- ENCRYPTION FLOW -->
+<section class="section" id="encryption">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start">
+      <div>
+        <span class="section-label">Encryption</span>
+        <h2 class="section-title" style="font-size:32px;margin-bottom:16px">How your data is protected</h2>
+        <p style="font-size:16px;color:var(--text2);line-height:1.75;margin-bottom:40px">Every vault entry goes through a multi-layer encryption process entirely inside your browser before a single byte reaches our servers.</p>
+        <div class="flow">
+          <div class="flow-step animate-up">
+            <div class="flow-num">1</div>
+            <div class="flow-content">
+              <div class="flow-title">You enter your master password</div>
+              <div class="flow-desc">Your password is used as the seed for key derivation. It is never stored, transmitted, or logged anywhere.</div>
+            </div>
+          </div>
+          <div class="flow-step animate-up delay-1">
+            <div class="flow-num">2</div>
+            <div class="flow-content">
+              <div class="flow-title">PBKDF2 derives your encryption key</div>
+              <div class="flow-desc">Using a unique per-account salt stored on the server, PBKDF2-SHA256 runs 310,000 iterations to produce a 256-bit encryption key. This makes brute-force attacks computationally expensive.</div>
+              <div class="flow-code">PBKDF2(password, salt, 310000, SHA-256) → 256-bit key</div>
+            </div>
+          </div>
+          <div class="flow-step animate-up delay-2">
+            <div class="flow-num">3</div>
+            <div class="flow-content">
+              <div class="flow-title">AES-256-GCM encrypts each entry</div>
+              <div class="flow-desc">Each vault entry is serialised to JSON and encrypted with AES-256-GCM. A unique 96-bit IV is generated per operation. The authentication tag ensures tamper detection.</div>
+              <div class="flow-code">AES-256-GCM(key, iv, plaintext) → ciphertext + authTag</div>
+            </div>
+          </div>
+          <div class="flow-step animate-up delay-3">
+            <div class="flow-num">4</div>
+            <div class="flow-content">
+              <div class="flow-title">Ciphertext sent to server</div>
+              <div class="flow-desc">Only the encrypted blob is transmitted — the key never leaves your browser. The server stores base64-encoded ciphertext it cannot decode.</div>
+            </div>
+          </div>
+          <div class="flow-step animate-up delay-4">
+            <div class="flow-num">5</div>
+            <div class="flow-content">
+              <div class="flow-title">Decryption happens locally on retrieval</div>
+              <div class="flow-desc">When you load your vault, the server sends ciphertext back. Your browser decrypts it using the key in memory. On logout, the key is wiped.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="position:sticky;top:120px">
+        <div class="card" style="background:var(--text);border-color:rgba(255,255,255,0.1);margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);margin-bottom:16px">What the server stores</div>
+          <div style="font-family:'Outfit',monospace;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.8;word-break:break-all">
+            <div style="color:rgba(255,255,255,0.3);margin-bottom:8px">// Entry in database — unreadable</div>
+            <span style="color:#93c5fd">"ciphertext"</span><span style="color:rgba(255,255,255,0.4)">: </span><span style="color:#86efac">"dGhpcyBpcyBlbmNyeXB0ZWQ<br>gYW5kIHRoZSBzZXJ2ZXIgY2Fu<br>bm90IHJlYWQgaXQ="</span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:16px">What only you can read</div>
+          <div style="font-family:'Outfit',monospace;font-size:12px;color:var(--text2);line-height:1.8">
+            <div style="color:var(--text3);margin-bottom:8px">// Decrypted in browser — never sent</div>
+            <span style="color:var(--accent)">"site"</span><span style="color:var(--text3)">: </span><span style="color:var(--success)">"GitHub"</span><span style="color:var(--text3)">,</span><br>
+            <span style="color:var(--accent)">"username"</span><span style="color:var(--text3)">: </span><span style="color:var(--success)">"alex@example.com"</span><span style="color:var(--text3)">,</span><br>
+            <span style="color:var(--accent)">"password"</span><span style="color:var(--text3)">: </span><span style="color:var(--success)">"Xk#9mP2vQr!"</span>
+          </div>
+        </div>
+
+        <div class="card" style="background:var(--success-bg);border-color:#bbf7d0">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span style="font-size:14px;font-weight:600;color:#15803d">Zero-knowledge guarantee</span>
+          </div>
+          <p style="font-size:13px;color:#166534;line-height:1.6">Even if our database were compromised, attackers would only obtain ciphertext they cannot decrypt without your master password.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section" style="background:var(--surface)" id="architecture">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:56px">
+      <span class="section-label">Architecture</span>
+      <h2 class="section-title">How the system is built</h2>
+      <p class="section-sub">A clean separation between what the client handles and what the server handles.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+          <div style="width:40px;height:40px;background:var(--accent-bg);border-radius:10px;display:grid;place-items:center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:600">Browser (Client)</div>
+            <div style="font-size:12px;color:var(--text3)">HTML + CSS + Vanilla JS</div>
+          </div>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px">
+          <li style="display:flex;gap:10px;font-size:14px;color:var(--text2)"><span style="color:var(--success);font-weight:700;flex-shrink:0">✓</span>Derives encryption key from password using PBKDF2</li>
+          <li style="display:flex;gap:10px;font-size:14px;color:var(--text2)"><span style="color:var(--success);font-weight:700;flex-shrink:0">✓</span>Encrypts entries with AES-256-GCM before sending</li>
+          <li style="display:flex;gap:10px;font-size:14px;color:var(--text2)"><span style="color:var(--success);font-weight:700;flex-shrink:0">✓</span>Decrypts entries after fetching from API</li>
+          <li style="display:flex;gap:10px;font-size:14px;color:var(--text2)"><span style="color:var(--success);font-weight:700;flex-shrink:0">✓</span>Holds encryption key in memory only</li>
+          <li style="display:flex;gap:10px;font-size:14px;color:var(--text2)"><span style="color:var(--success);font-weight:700;flex-shrink:0">✓</span>Wipes key from memory on logout</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+          <div style="width:40px;height:40px;background:var(--bg2);border-radius:10px;display:grid;place-items:center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:600">Server (PHP + MySQL)</div>
+            <div style="font-size:12px;color:var(--text3)">PHP 8 + MySQL / XAMPP</div>
+          </div>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px">
+          <li style="display:flex;gap:10px;font-size:14px;color:var(--text2)"><span style="color:var(--success);font-weight:700;flex-shrink:0">✓</span>Handles user registration and authentication</li>
+          <li style="display:flex;gap:10px;font-size:14px;color:var(--text2)"><span style="color:var(--success);font-weight:700;flex-shrink:0">✓</span>Stores bcrypt-hashed passwords (cost 12)</li>
+          <li style="display:flex;gap:10px;font-size:14px;color:var(--text2)"><span style="color:var(--success);font-weight:700;flex-shrink:0">✓</span>Stores per-user PBKDF2 salt (public — not secret)</li>
+          <li style="display:flex;gap:10px;font-size:14px;color:var(--text2)"><span style="color:var(--success);font-weight:700;flex-shrink:0">✓</span>Stores and serves encrypted ciphertext blobs</li>
+          <li style="display:flex;gap:10px;font-size:14px;color:var(--text2);"><span style="color:var(--danger);font-weight:700;flex-shrink:0">✗</span>Never sees or stores the encryption key</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH SPECS -->
+<section class="section" id="tech">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:48px">
+      <span class="section-label">Tech Specs</span>
+      <h2 class="section-title">Implementation details</h2>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)">
+      <table class="tech-table">
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Specification</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Symmetric encryption</td>
+            <td><span class="tech-pill blue">AES-256-GCM</span> 256-bit key, 96-bit IV (random per operation), 128-bit authentication tag</td>
+          </tr>
+          <tr>
+            <td>Key derivation</td>
+            <td><span class="tech-pill blue">PBKDF2-SHA256</span> 310,000 iterations — meets NIST SP 800-132 recommendations for 2024</td>
+          </tr>
+          <tr>
+            <td>KDF salt</td>
+            <td>32 random bytes (64 hex chars), unique per user, generated server-side with <code>random_bytes()</code></td>
+          </tr>
+          <tr>
+            <td>Password hashing</td>
+            <td><span class="tech-pill green">bcrypt</span> PHP <code>password_hash()</code> with cost factor 12</td>
+          </tr>
+          <tr>
+            <td>Crypto implementation</td>
+            <td>Browser-native <strong>Web Crypto API</strong> — no external libraries, no npm dependencies</td>
+          </tr>
+          <tr>
+            <td>Session management</td>
+            <td>PHP <code>$_SESSION</code> server-side sessions. Session expires on tab/browser close (sessionStorage flag).</td>
+          </tr>
+          <tr>
+            <td>Ciphertext format</td>
+            <td>base64( IV[12 bytes] + AES-GCM-ciphertext + authTag[16 bytes] )</td>
+          </tr>
+          <tr>
+            <td>Transport</td>
+            <td>HTTPS recommended in production. All API calls use <code>credentials: 'same-origin'</code>.</td>
+          </tr>
+          <tr>
+            <td>Key lifetime</td>
+            <td>In-memory only. Never stored in localStorage, sessionStorage, cookies, or transmitted to server.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="section" style="background:var(--surface)" id="comparison">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:48px">
+      <span class="section-label">Comparison</span>
+      <h2 class="section-title">How KeyNest compares</h2>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="compare-table" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)">
+        <thead>
+          <tr>
+            <th style="width:200px">Feature</th>
+            <th class="highlight" style="min-width:140px">KeyNest</th>
+            <th style="min-width:140px">Browser built-in</th>
+            <th style="min-width:140px">Sticky notes / docs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Client-side encryption</td>
+            <td class="highlight"><span class="check">✓ Yes</span></td>
+            <td><span class="partial">~ Partial</span></td>
+            <td><span class="cross">✗ No</span></td>
+          </tr>
+          <tr>
+            <td>Zero-knowledge server</td>
+            <td class="highlight"><span class="check">✓ Yes</span></td>
+            <td><span class="cross">✗ No</span></td>
+            <td><span class="cross">✗ No</span></td>
+          </tr>
+          <tr>
+            <td>Open source / auditable</td>
+            <td class="highlight"><span class="check">✓ Yes</span></td>
+            <td><span class="cross">✗ No</span></td>
+            <td><span class="cross">✗ No</span></td>
+          </tr>
+          <tr>
+            <td>Password health report</td>
+            <td class="highlight"><span class="check">✓ Yes</span></td>
+            <td><span class="partial">~ Basic</span></td>
+            <td><span class="cross">✗ No</span></td>
+          </tr>
+          <tr>
+            <td>Secure notes</td>
+            <td class="highlight"><span class="check">✓ Yes</span></td>
+            <td><span class="cross">✗ No</span></td>
+            <td><span class="cross">✗ No</span></td>
+          </tr>
+          <tr>
+            <td>Password generator</td>
+            <td class="highlight"><span class="check">✓ Yes</span></td>
+            <td><span class="check">✓ Yes</span></td>
+            <td><span class="cross">✗ No</span></td>
+          </tr>
+          <tr>
+            <td>Runs locally</td>
+            <td class="highlight"><span class="check">✓ Yes</span></td>
+            <td><span class="check">✓ Yes</span></td>
+            <td><span class="partial">~ Maybe</span></td>
+          </tr>
+          <tr>
+            <td>Trash & restore</td>
+            <td class="highlight"><span class="check">✓ Yes</span></td>
+            <td><span class="cross">✗ No</span></td>
+            <td><span class="cross">✗ No</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="container-sm">
+    <div class="text-center" style="margin-bottom:48px">
+      <span class="section-label">FAQ</span>
+      <h2 class="section-title">Common questions</h2>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        What happens if I forget my master password?
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div class="faq-a">Your vault cannot be recovered without your master password. Since we never store or know your encryption key, there is no password reset mechanism — this is intentional. If you forget your password, your vault entries are permanently unrecoverable. Choose a strong password you won't forget, and consider storing it somewhere very safe.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Can KeyNest employees read my passwords?
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div class="faq-a">No. The server only stores ciphertext encrypted with a key we never see. Even with full database access, entries are mathematically unreadable without the user's master password. This is the zero-knowledge guarantee.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Why PBKDF2 and not Argon2?
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div class="faq-a">Argon2 is theoretically stronger for key derivation because it is memory-hard. However, it is not natively supported in browser Web Crypto APIs and requires a third-party JavaScript library. PBKDF2 is built into every modern browser, requires zero external dependencies, and at 310,000 iterations is more than sufficient for a personal password manager. Argon2 support may be added in a future version.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Is KeyNest safe to use on a shared computer?
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div class="faq-a">Sessions are stored in sessionStorage, so they expire automatically when you close the tab. However, on a shared computer we recommend always clicking Sign Out explicitly, and being cautious about keyloggers or screen recording software that could capture your master password at login.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        What happens if the database is breached?
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div class="faq-a">An attacker who obtains the database gets encrypted blobs and bcrypt-hashed passwords. The blobs are unreadable without the per-user encryption key, which is never stored. The bcrypt hashes are designed to be slow to crack. As long as your master password is strong, a database breach does not expose your vault contents.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Is this project open source?
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div class="faq-a">Yes. The full source code is available on GitHub under the MIT license. You can audit the encryption implementation yourself, run your own instance, or contribute improvements.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section-sm">
+  <div class="container">
+    <div class="cta-box animate-up">
+      <h2>Privacy you can verify</h2>
+      <p>Don't take our word for it — read the source code and audit the encryption yourself.</p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
+        <a href="https://github.com/Ayoub81A/keynest" target="_blank" class="btn btn-accent btn-lg">View on GitHub</a>
+        <a href="../keynest/index.html" class="btn btn-lg" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2)">Open App</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo" style="margin-bottom:14px;display:inline-flex">
+          <div class="nav-logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
+          <span class="nav-logo-text">Key<em style="color:rgba(255,255,255,0.4)">Nest</em></span>
+        </a>
+        <p>A secure, open-source password manager built on client-side encryption.</p>
+      </div>
+      <div class="footer-col"><h4>Product</h4><ul><li><a href="features.html">Features</a></li><li><a href="security.html">Security</a></li><li><a href="../keynest/index.html">Open App</a></li></ul></div>
+      <div class="footer-col"><h4>Learn</h4><ul><li><a href="#encryption">Encryption</a></li><li><a href="#architecture">Architecture</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+      <div class="footer-col"><h4>More</h4><ul><li><a href="https://github.com/Ayoub81A/keynest" target="_blank">GitHub</a></li><li><a href="#">Changelog</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 KeyNest. MIT License.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+
+// Highlight active section in sticky nav
+const sections = ['encryption','architecture','tech','comparison','faq'];
+const navLinks  = document.querySelectorAll('.section-nav a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 120) current = id;
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+</script>
+</body>
+</html>

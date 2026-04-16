@@ -1,0 +1,284 @@
+/* ============================================================
+   KeyNest Marketing Site — Shared Styles
+   Fonts: Lora (display) + Outfit (body)
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #f7f5f2;
+  --bg2:       #f0ede8;
+  --surface:   #ffffff;
+  --border:    #e4dfd8;
+  --text:      #1c1917;
+  --text2:     #78716c;
+  --text3:     #a8a29e;
+  --accent:    #1c4ed8;
+  --accent-bg: #eff3ff;
+  --accent2:   #1e40af;
+  --success:   #16a34a;
+  --warn:      #b45309;
+  --danger:    #dc2626;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06);
+  --radius:    14px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── TYPOGRAPHY ── */
+h1, h2, h3, h4 {
+  font-family: 'Lora', serif;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ── LAYOUT ── */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.container-sm {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(247,245,242,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Lora', serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--text);
+  word-spacing: -2;
+  white-space: nowrap; 
+}
+
+.nav-logo-mark {
+  width: 34px; height: 34px;
+  background: var(--text);
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+}
+.nav-logo-mark svg { width: 18px; height: 18px; }
+
+.nav-logo-text {
+  white-space: nowrap;
+  letter-spacing: -0.3px;
+  color: var(--text);      /* "Key" stays dark */
+}
+.nav-logo-text em {
+  color: var(--accent);    /* "Nest" is blue */
+  font-style: normal;
+} 
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text2);
+  transition: color 0.15s;
+}
+.nav-links a:hover,
+.nav-links a.active { color: var(--text); }
+
+.nav-cta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-lg { font-size: 15px; padding: 13px 26px; border-radius: 100px; }
+.btn-md { font-size: 14px; padding: 10px 20px; border-radius: 100px; }
+.btn-sm { font-size: 13px; padding: 8px 16px;  border-radius: 100px; }
+
+.btn-dark { background: var(--text); color: #fff; box-shadow: var(--shadow-sm); }
+.btn-dark:hover { background: #2d2926; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+.btn-outline { background: none; color: var(--text2); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--surface); color: var(--text); border-color: #d4cfc9; }
+
+.btn-accent { background: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(28,78,216,0.25); }
+.btn-accent:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(28,78,216,0.32); }
+
+.btn svg { width: 16px; height: 16px; stroke-width: 2; flex-shrink: 0; }
+
+/* ── SECTION ── */
+.section { padding: 96px 0; }
+.section-sm { padding: 64px 0; }
+.section-lg { padding: 120px 0; }
+
+.section-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: clamp(28px, 4vw, 44px);
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.section-sub {
+  font-size: 17px;
+  color: var(--text2);
+  line-height: 1.7;
+  max-width: 560px;
+}
+
+.text-center { text-align: center; }
+.text-center .section-sub { margin: 0 auto; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+/* ── BADGE ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+.badge-green  { background: #dcfce7; color: #15803d; }
+.badge-blue   { background: var(--accent-bg); color: var(--accent); }
+.badge-warm   { background: #fef3c7; color: var(--warn); }
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: var(--border); }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--text);
+  color: rgba(255,255,255,0.7);
+  padding: 60px 0 40px;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(3, 1fr);
+  gap: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.footer-brand .nav-logo { color: #fff; margin-bottom: 14px; }
+.footer-brand .nav-logo-mark { background: rgba(255,255,255,0.15); }
+.footer-brand p { font-size: 14px; line-height: 1.7; max-width: 240px; }
+.footer-brand .nav-logo-text { color: #fff; }  
+.footer-brand .nav-logo-text em { color: rgba(255,255,255,0.6); }
+
+.footer-col h4 { font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); margin-bottom: 16px; }
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer-col a { font-size: 14px; color: rgba(255,255,255,0.6); transition: color 0.12s; }
+.footer-col a:hover { color: #fff; }
+
+.footer-bottom {
+  padding-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-up { animation: fadeUp 0.5s ease both; }
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }

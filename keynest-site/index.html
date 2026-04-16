@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KeyNest — Secure Password Manager</title>
+<meta name="description" content="KeyNest keeps your passwords safe with client-side AES-256-GCM encryption. Your data never leaves your device unencrypted.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+
+/* ── HERO ── */
+.hero {
+  padding: 100px 0 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -120px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(28,78,216,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 5px 14px;
+  border-radius: 100px;
+  margin-bottom: 20px;
+}
+.hero-eyebrow svg { width: 13px; height: 13px; stroke-width: 2; }
+
+.hero-title {
+  font-size: clamp(36px, 5vw, 58px);
+  line-height: 1.1;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.hero-title em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.hero-sub {
+  font-size: 18px;
+  color: var(--text2);
+  line-height: 1.7;
+  margin-bottom: 36px;
+  max-width: 480px;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.hero-trust {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--text3);
+  font-weight: 500;
+}
+.trust-item svg { width: 15px; height: 15px; stroke-width: 2; color: var(--success); flex-shrink: 0; }
+
+/* ── HERO VISUAL ── */
+.hero-visual {
+  position: relative;
+}
+
+.app-mockup {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.mockup-bar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mockup-dots { display: flex; gap: 6px; }
+.mockup-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+.mockup-dot:nth-child(1) { background: #fc605b; }
+.mockup-dot:nth-child(2) { background: #fdbc40; }
+.mockup-dot:nth-child(3) { background: #34c749; }
+
+.mockup-url {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 10px; font-size: 11px; color: var(--text3);
+  font-family: 'Outfit', monospace;
+}
+
+.mockup-body { padding: 20px; }
+
+.mockup-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.mockup-logo {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Lora', serif; font-size: 16px; font-weight: 600;
+}
+.mockup-logo-mark {
+  width: 28px; height: 28px; background: var(--text);
+  border-radius: 7px; display: grid; place-items: center;
+}
+.mockup-logo-mark svg { width: 14px; height: 14px; }
+.mockup-logo span { color: var(--accent); }
+
+.mockup-fab {
+  width: 32px; height: 32px; background: var(--text);
+  border-radius: 50%; display: grid; place-items: center;
+}
+.mockup-fab svg { width: 16px; height: 16px; stroke-width: 2.2; }
+
+.mockup-stats {
+  display: flex; gap: 6px; margin-bottom: 14px;
+}
+.mockup-stat {
+  flex: 1; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px; text-align: center;
+}
+.mockup-stat-num { font-family: 'Lora', serif; font-size: 18px; font-weight: 400; line-height: 1; }
+.mockup-stat-label { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; font-weight: 600; }
+
+.mockup-entries { display: flex; flex-direction: column; gap: 6px; }
+.mockup-entry {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.mockup-icon {
+  width: 32px; height: 32px; background: var(--surface);
+  border-radius: 8px; border: 1px solid var(--border);
+  display: grid; place-items: center;
+  font-size: 11px; font-weight: 700; color: var(--text2);
+  flex-shrink: 0;
+}
+.mockup-info { flex: 1; min-width: 0; }
+.mockup-site { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+.mockup-user { font-size: 10px; color: var(--text3); }
+.mockup-pw { font-family: monospace; font-size: 10px; color: var(--text3); letter-spacing: 1px; }
+.mockup-badge {
+  font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 100px;
+}
+.mockup-badge.strong { background: #dcfce7; color: #15803d; }
+.mockup-badge.weak   { background: #fef2f2; color: #dc2626; }
+
+/* floating badge */
+.hero-float {
+  position: absolute;
+  bottom: -16px; left: -20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: var(--shadow-md);
+  display: flex; align-items: center; gap: 10px;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+.hero-float-icon { width: 36px; height: 36px; background: #dcfce7; border-radius: 8px; display: grid; place-items: center; }
+.hero-float-icon svg { width: 18px; height: 18px; stroke-width: 2; color: #15803d; }
+.hero-float-text { font-size: 13px; }
+.hero-float-text strong { display: block; font-weight: 600; color: var(--text); font-size: 13px; }
+.hero-float-text span { color: var(--text3); font-size: 11px; }
+
+/* ── LOGOS ── */
+.logos-section {
+  padding: 40px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.logos-label { font-size: 12px; color: var(--text3); font-weight: 500; text-align: center; margin-bottom: 20px; letter-spacing: 0.5px; }
+.logos-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 48px; flex-wrap: wrap;
+}
+.logo-item { font-family: 'Lora', serif; font-size: 18px; font-weight: 600; color: var(--border); letter-spacing: -0.3px; }
+
+/* ── FEATURES GRID ── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.feat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.feat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+.feat-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: grid; place-items: center;
+  margin-bottom: 18px;
+}
+.feat-icon svg { width: 22px; height: 22px; stroke-width: 1.75; }
+.feat-icon.blue   { background: var(--accent-bg); color: var(--accent); }
+.feat-icon.green  { background: #dcfce7; color: #15803d; }
+.feat-icon.warm   { background: #fef3c7; color: var(--warn); }
+.feat-icon.red    { background: #fef2f2; color: var(--danger); }
+.feat-icon.purple { background: #f3e8ff; color: #7c3aed; }
+.feat-icon.stone  { background: var(--bg2); color: var(--text2); }
+
+.feat-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+.feat-desc  { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+/* ── HOW IT WORKS ── */
+.how-bg { background: var(--text); }
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  position: relative;
+}
+
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 28px; left: calc(16.66% + 16px); right: calc(16.66% + 16px);
+  height: 1px;
+  background: rgba(255,255,255,0.15);
+}
+
+.step { text-align: center; }
+
+.step-num {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  display: grid; place-items: center;
+  margin: 0 auto 20px;
+  font-family: 'Lora', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+.step h3 { font-size: 17px; color: #fff; margin-bottom: 10px; font-family: 'Lora', serif; }
+.step p  { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.7; }
+
+/* ── CTA ── */
+.cta-box {
+  background: var(--text);
+  border-radius: 24px;
+  padding: 64px;
+  text-align: center;
+}
+.cta-box h2 { color: #fff; font-size: clamp(26px, 4vw, 40px); margin-bottom: 14px; }
+.cta-box p  { color: rgba(255,255,255,0.55); font-size: 17px; margin-bottom: 32px; max-width: 480px; margin-left:auto; margin-right:auto; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+  .hero-visual { order: -1; }
+  .hero-float { display: none; }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .steps { grid-template-columns: 1fr; gap: 32px; }
+  .steps::before { display: none; }
+  .cta-box { padding: 40px 24px; }
+}
+
+@media (max-width: 600px) {
+  .features-grid { grid-template-columns: 1fr; }
+  .hero { padding: 60px 0 48px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+        </svg>
+      </div>
+      <span class="nav-logo-text">Key<em>Nest</em></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="features.html">Features</a></li>
+      <li><a href="security.html">Security</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="security.html" class="btn btn-outline btn-sm">How it works</a>
+      <a href="../keynest/index.html" class="btn btn-dark btn-sm">Open App</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow animate-up">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        AES-256-GCM Encrypted
+      </div>
+      <h1 class="hero-title animate-up delay-1">
+        Your passwords,<br><em>truly private</em>
+      </h1>
+      <p class="hero-sub animate-up delay-2">
+        KeyNest stores your passwords with military-grade encryption. Your data is encrypted in your browser before it ever reaches our servers — we physically cannot read it.
+      </p>
+      <div class="hero-actions animate-up delay-3">
+        <a href="../keynest/index.html" class="btn btn-dark btn-lg">
+          Get Started — It's Free
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <a href="security.html" class="btn btn-outline btn-lg">How it works</a>
+      </div>
+      <div class="hero-trust animate-up delay-4">
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          No account required to try
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Open source
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Runs locally
+        </div>
+      </div>
+    </div>
+
+    <!-- APP MOCKUP -->
+    <div class="hero-visual animate-up delay-2">
+      <div class="app-mockup">
+        <div class="mockup-bar">
+          <div class="mockup-dots">
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+          </div>
+          <div class="mockup-url">localhost/keynest</div>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-header">
+            <div class="mockup-logo">
+              <div class="mockup-logo-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3"/></svg>
+              </div>
+              <span class="nav-logo-text">Key<em style="color:var(--accent)">Nest</em></span>
+            </div>
+            <div class="mockup-fab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+          </div>
+          <div class="mockup-stats">
+            <div class="mockup-stat"><div class="mockup-stat-num">12</div><div class="mockup-stat-label">Stored</div></div>
+            <div class="mockup-stat"><div class="mockup-stat-num" style="color:var(--success)">9</div><div class="mockup-stat-label">Strong</div></div>
+            <div class="mockup-stat"><div class="mockup-stat-num" style="color:var(--danger)">2</div><div class="mockup-stat-label">Weak</div></div>
+            <div class="mockup-stat"><div class="mockup-stat-num">1</div><div class="mockup-stat-label">Notes</div></div>
+          </div>
+          <div class="mockup-entries">
+            <div class="mockup-entry">
+              <div class="mockup-icon">G</div>
+              <div class="mockup-info">
+                <div class="mockup-site">GitHub</div>
+                <div class="mockup-user">alex@example.com</div>
+                <div class="mockup-pw">••••••••••••</div>
+              </div>
+              <span class="mockup-badge strong">Strong</span>
+            </div>
+            <div class="mockup-entry">
+              <div class="mockup-icon">V</div>
+              <div class="mockup-info">
+                <div class="mockup-site">Vercel</div>
+                <div class="mockup-user">alex@example.com</div>
+                <div class="mockup-pw">••••••••••••</div>
+              </div>
+              <span class="mockup-badge strong">Strong</span>
+            </div>
+            <div class="mockup-entry">
+              <div class="mockup-icon">T</div>
+              <div class="mockup-info">
+                <div class="mockup-site">Twitter / X</div>
+                <div class="mockup-user">@alexmorgan</div>
+                <div class="mockup-pw">••••••••</div>
+              </div>
+              <span class="mockup-badge weak">Weak</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-float">
+        <div class="hero-float-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="hero-float-text">
+          <strong>Encrypted locally</strong>
+          <span>AES-256-GCM · PBKDF2</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGOS -->
+<div class="logos-section">
+  <div class="container">
+    <p class="logos-label">Built with trusted, open standards</p>
+    <div class="logos-row">
+      <span class="logo-item">Web Crypto API</span>
+      <span class="logo-item">AES-256-GCM</span>
+      <span class="logo-item">PBKDF2</span>
+      <span class="logo-item">PHP 8</span>
+      <span class="logo-item">MySQL</span>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:56px">
+      <span class="section-label">Features</span>
+      <h2 class="section-title">Everything you need to stay secure</h2>
+      <p class="section-sub">KeyNest is designed to be simple enough to use every day, and secure enough to trust with your most sensitive data.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feat-card animate-up">
+        <div class="feat-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="feat-title">End-to-End Encryption</div>
+        <div class="feat-desc">Passwords are encrypted in your browser with AES-256-GCM before they ever reach the server. The key never leaves your device.</div>
+      </div>
+
+      <div class="feat-card animate-up delay-1">
+        <div class="feat-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </div>
+        <div class="feat-title">Password Generator</div>
+        <div class="feat-desc">Generate strong, random passwords up to 40 characters with full control over character sets — uppercase, lowercase, numbers, and symbols.</div>
+      </div>
+
+      <div class="feat-card animate-up delay-2">
+        <div class="feat-icon warm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="feat-title">Health Report</div>
+        <div class="feat-desc">Get a vault health score and see all weak, reused, and medium-strength passwords in one place with direct links to fix them.</div>
+      </div>
+
+      <div class="feat-card animate-up">
+        <div class="feat-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="feat-title">Secure Notes</div>
+        <div class="feat-desc">Store sensitive information beyond passwords — WiFi credentials, license keys, PINs, or anything else you need kept private.</div>
+      </div>
+
+      <div class="feat-card animate-up delay-1">
+        <div class="feat-icon stone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        </div>
+        <div class="feat-title">Tags & Organisation</div>
+        <div class="feat-desc">Organise entries with custom tags. Filter by tag instantly from the sidebar. Assign multiple tags per entry.</div>
+      </div>
+
+      <div class="feat-card animate-up delay-2">
+        <div class="feat-icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </div>
+        <div class="feat-title">Trash & Restore</div>
+        <div class="feat-desc">Accidentally deleted something? Entries go to trash first and are kept for 30 days before permanent deletion. Restore with one click.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section how-bg">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:56px">
+      <span class="section-label" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7)">How It Works</span>
+      <h2 class="section-title" style="color:#fff">Simple. Secure. Private.</h2>
+      <p class="section-sub" style="color:rgba(255,255,255,0.5);margin:0 auto">Three steps to a more secure digital life.</p>
+    </div>
+    <div class="steps">
+      <div class="step animate-up">
+        <div class="step-num">1</div>
+        <h3>Create an account</h3>
+        <p>Register with your email and a strong master password. Your password is hashed with bcrypt — we never store it in plain text.</p>
+      </div>
+      <div class="step animate-up delay-1">
+        <div class="step-num">2</div>
+        <h3>Add your passwords</h3>
+        <p>Each entry is encrypted in your browser with AES-256-GCM before being stored. The server receives only ciphertext it can never read.</p>
+      </div>
+      <div class="step animate-up delay-2">
+        <div class="step-num">3</div>
+        <h3>Access anywhere</h3>
+        <p>Log in from any device running KeyNest. Your encryption key is derived from your password on the fly and wiped on logout.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section">
+  <div class="container">
+    <div class="cta-box animate-up">
+      <span class="section-label" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);margin-bottom:20px">Get Started</span>
+      <h2>Ready to secure your passwords?</h2>
+      <p>KeyNest is free, open source, and runs entirely on your own machine. No subscriptions. No cloud. No compromises.</p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
+        <a href="../keynest/index.html" class="btn btn-accent btn-lg">Open KeyNest App</a>
+        <a href="security.html" class="btn btn-lg" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2)">Read security docs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo" style="margin-bottom:14px;display:inline-flex">
+          <div class="nav-logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
+          <span class="nav-logo-text">Key<em>Nest</em style="color:rgba(255,255,255,0.4)></span>
+        </a>
+        <p>A secure, open-source password manager built on client-side encryption.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="features.html">Features</a></li>
+          <li><a href="security.html">Security</a></li>
+          <li><a href="../keynest/index.html">Open App</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Learn</h4>
+        <ul>
+          <li><a href="security.html#encryption">Encryption</a></li>
+          <li><a href="security.html#architecture">Architecture</a></li>
+          <li><a href="security.html#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>More</h4>
+        <ul>
+          <li><a href="https://github.com/Ayoub81A/keynest" target="_blank">GitHub</a></li>
+          <li><a href="#">Changelog</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 KeyNest. MIT License.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

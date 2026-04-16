@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Features — KeyNest</title>
+<meta name="description" content="Explore every feature KeyNest offers — from encrypted vault storage to password health reports and secure notes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+
+/* PAGE HERO */
+.page-hero {
+  padding: 80px 0 64px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.page-hero .section-title { margin-bottom: 14px; }
+.page-hero .section-sub   { margin: 0 auto; }
+
+/* FEATURE BLOCK */
+.feature-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  padding: 80px 0;
+  border-bottom: 1px solid var(--border);
+}
+.feature-block:last-child { border-bottom: none; }
+.feature-block.reverse .feature-visual { order: -1; }
+
+.feature-text .section-label { margin-bottom: 14px; }
+.feature-text h2 { font-size: clamp(24px, 3vw, 36px); margin-bottom: 14px; }
+.feature-text p  { font-size: 16px; color: var(--text2); line-height: 1.75; margin-bottom: 20px; }
+
+.feature-list {
+  display: flex; flex-direction: column; gap: 10px;
+  list-style: none;
+}
+.feature-list li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 14px; color: var(--text2); line-height: 1.6;
+}
+.feature-list li svg { width: 16px; height: 16px; stroke-width: 2; color: var(--success); flex-shrink: 0; margin-top: 2px; }
+
+/* VISUAL PANELS */
+.visual-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.vp-header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.vp-dot { width: 9px; height: 9px; border-radius: 50%; }
+.vp-body { padding: 20px; }
+
+/* Generator visual */
+.gen-display {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px;
+  font-family: 'Outfit', monospace;
+  font-size: 17px; font-weight: 700;
+  color: var(--text); letter-spacing: 1px;
+  word-break: break-all; line-height: 1.4;
+  margin-bottom: 16px;
+}
+
+.gen-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.gen-opt {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 8px;
+  border: 1px solid var(--accent); background: var(--accent-bg);
+  font-size: 12px; font-weight: 600; color: var(--accent);
+}
+.gen-opt-dot {
+  width: 13px; height: 13px; border-radius: 3px;
+  background: var(--accent); display: grid; place-items: center;
+}
+.gen-opt-dot::after { content: '✓'; font-size: 8px; color: white; font-weight: 700; }
+
+.gen-slider-row { margin-bottom: 16px; }
+.gen-slider-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
+.gen-slider-label strong { color: var(--text); }
+.slider-track { height: 4px; background: var(--border); border-radius: 100px; position: relative; }
+.slider-fill  { height: 100%; background: var(--accent); border-radius: 100px; width: 50%; }
+.slider-thumb { width: 14px; height: 14px; background: var(--accent); border-radius: 50%; position: absolute; top: -5px; left: 50%; transform: translateX(-50%); box-shadow: 0 0 0 3px var(--accent-bg); }
+
+.gen-use-btn {
+  width: 100%; padding: 11px; background: var(--accent-bg);
+  border: 1px solid rgba(28,78,216,0.2); border-radius: 10px;
+  font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600;
+  color: var(--accent); cursor: pointer; text-align: center;
+}
+
+/* Health visual */
+.health-score-row { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 12px; }
+.health-score-num { font-family: 'Lora', serif; font-size: 48px; font-weight: 400; color: var(--success); line-height: 1; }
+.health-grade { background: #dcfce7; color: #15803d; font-size: 13px; font-weight: 700; padding: 5px 14px; border-radius: 100px; }
+.health-bar-bg { height: 6px; background: var(--border); border-radius: 100px; overflow: hidden; margin-bottom: 16px; }
+.health-bar-fill { height: 100%; background: var(--success); border-radius: 100px; width: 78%; }
+.health-stats { display: flex; gap: 16px; }
+.health-stat { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text2); }
+.health-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.health-stat strong { color: var(--text); font-weight: 600; }
+
+/* Notes visual */
+.note-item {
+  background: #fdfaf4; border: 1px solid #e8dfc8; border-left: 3px solid #c9a84c;
+  border-radius: 10px; padding: 14px; margin-bottom: 10px;
+}
+.note-item-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.note-item-body  { font-size: 12px; color: var(--text2); line-height: 1.5; font-family: 'Outfit', monospace; }
+
+/* Trash visual */
+.trash-item {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
+  opacity: 0.7;
+}
+.trash-item-row { display: flex; align-items: center; gap: 10px; }
+.trash-item-icon { width: 32px; height: 32px; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); display: grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--text3); flex-shrink: 0; }
+.trash-item-info { flex: 1; }
+.trash-item-title { font-size: 12px; font-weight: 600; color: var(--text2); }
+.trash-item-sub   { font-size: 10px; color: var(--text3); }
+.trash-actions-row { display: flex; gap: 6px; }
+.trash-btn { padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; }
+.trash-btn.restore { color: var(--success); border-color: #bbf7d0; background: #f0fdf4; }
+.trash-timer { font-size: 10px; color: var(--danger); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+
+/* Tags visual */
+.tags-wrap { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+.tag-chip { padding: 5px 13px; border-radius: 100px; font-size: 12px; font-weight: 600; }
+.tag-chip.on  { background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(28,78,216,0.2); }
+.tag-chip.off { background: var(--bg2); color: var(--text2); border: 1px solid var(--border); }
+
+/* MINI FEATURE GRID */
+.mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.mini-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); }
+.mini-icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; margin-bottom: 14px; }
+.mini-icon svg { width: 18px; height: 18px; stroke-width: 1.75; }
+.mini-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.mini-desc  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .feature-block { grid-template-columns: 1fr; gap: 40px; }
+  .feature-block.reverse .feature-visual { order: unset; }
+  .mini-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .mini-grid { grid-template-columns: 1fr; }
+  .gen-opts  { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+        </svg>
+      </div>
+      <span class="nav-logo-text">Key<em>Nest</em></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="features.html" class="active">Features</a></li>
+      <li><a href="security.html">Security</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="security.html" class="btn btn-outline btn-sm">Security</a>
+      <a href="../keynest/index.html" class="btn btn-dark btn-sm">Open App</a>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <span class="section-label">Features</span>
+    <h1 class="section-title">Built for real security</h1>
+    <p class="section-sub">Every feature in KeyNest is designed with one principle: your data belongs to you, and only you.</p>
+  </div>
+</div>
+
+<!-- FEATURE: VAULT -->
+<section class="section">
+  <div class="container">
+    <div class="feature-block">
+      <div class="feature-text animate-up">
+        <span class="section-label">Password Vault</span>
+        <h2>Store every password, organised and secure</h2>
+        <p>Your entire digital life in one place. Every password is encrypted before it leaves your browser so the server stores only ciphertext it can never decode.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Add, edit, and delete entries with site name, username, URL, and password</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> One-click copy for both password and username</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Show or hide passwords individually per entry</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Real-time password strength indicator (Weak / Medium / Strong)</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Instant search across all entries</li>
+        </ul>
+      </div>
+      <div class="feature-visual animate-up delay-1">
+        <div class="visual-panel">
+          <div class="vp-header">
+            <div class="vp-dot" style="background:#fc605b"></div>
+            <div class="vp-dot" style="background:#fdbc40"></div>
+            <div class="vp-dot" style="background:#34c749"></div>
+          </div>
+          <div class="vp-body">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+                <div style="display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:center">
+                  <div style="width:36px;height:36px;background:var(--surface);border-radius:8px;border:1px solid var(--border);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--text2)">G</div>
+                  <div>
+                    <div style="font-size:13px;font-weight:600;margin-bottom:2px">GitHub</div>
+                    <div style="font-size:11px;color:var(--text3)">alex@example.com</div>
+                  </div>
+                </div>
+                <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px">
+                  <span style="font-family:monospace;font-size:12px;color:var(--text2);letter-spacing:2px;flex:1">••••••••••••</span>
+                  <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:#dcfce7;color:#15803d">Strong</span>
+                </div>
+              </div>
+              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+                <div style="display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:center">
+                  <div style="width:36px;height:36px;background:var(--surface);border-radius:8px;border:1px solid var(--border);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--text2)">N</div>
+                  <div>
+                    <div style="font-size:13px;font-weight:600;margin-bottom:2px">Netflix</div>
+                    <div style="font-size:11px;color:var(--text3)">alex@example.com</div>
+                  </div>
+                </div>
+                <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px">
+                  <span style="font-family:monospace;font-size:12px;color:var(--text);font-weight:600;flex:1">n3tfl!xPass#9</span>
+                  <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:#dcfce7;color:#15803d">Strong</span>
+                </div>
+              </div>
+              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+                <div style="display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:center">
+                  <div style="width:36px;height:36px;background:var(--surface);border-radius:8px;border:1px solid var(--border);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--text2)">T</div>
+                  <div>
+                    <div style="font-size:13px;font-weight:600;margin-bottom:2px">Twitter / X</div>
+                    <div style="font-size:11px;color:var(--text3)">@alexmorgan</div>
+                  </div>
+                </div>
+                <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px">
+                  <span style="font-family:monospace;font-size:12px;color:var(--text2);letter-spacing:2px;flex:1">••••••••</span>
+                  <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:#fef2f2;color:#dc2626">Weak</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE: GENERATOR -->
+<section class="section" style="background:var(--surface)">
+  <div class="container">
+    <div class="feature-block reverse" style="border-bottom:none">
+      <div class="feature-text animate-up">
+        <span class="section-label">Generator</span>
+        <h2>Generate passwords you'll never have to remember</h2>
+        <p>Create cryptographically random passwords up to 40 characters long. Adjust the character set to match any site's requirements, then save directly to your vault in one click.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Cryptographically random using the browser's Web Crypto API</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Configurable length from 8 to 40 characters</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Toggle uppercase, lowercase, numbers, and symbols</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> "Use this password" opens a pre-filled new entry form</li>
+        </ul>
+      </div>
+      <div class="feature-visual animate-up delay-1">
+        <div class="visual-panel">
+          <div class="vp-header">
+            <div class="vp-dot" style="background:#fc605b"></div>
+            <div class="vp-dot" style="background:#fdbc40"></div>
+            <div class="vp-dot" style="background:#34c749"></div>
+          </div>
+          <div class="vp-body">
+            <div class="gen-display">Xk#9mP2v@Qr!f7Tz</div>
+            <div class="gen-opts">
+              <div class="gen-opt"><div class="gen-opt-dot"></div> A–Z</div>
+              <div class="gen-opt"><div class="gen-opt-dot"></div> a–z</div>
+              <div class="gen-opt"><div class="gen-opt-dot"></div> 0–9</div>
+              <div class="gen-opt"><div class="gen-opt-dot"></div> !@#</div>
+            </div>
+            <div class="gen-slider-row">
+              <div class="gen-slider-label"><span>Length</span><strong>16</strong></div>
+              <div class="slider-track">
+                <div class="slider-fill"></div>
+                <div class="slider-thumb"></div>
+              </div>
+            </div>
+            <div class="gen-use-btn">Use this password →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE: HEALTH -->
+<section class="section">
+  <div class="container">
+    <div class="feature-block">
+      <div class="feature-text animate-up">
+        <span class="section-label">Health Report</span>
+        <h2>Know exactly how secure your vault is</h2>
+        <p>KeyNest analyses every password in your vault and gives you a health score out of 100. See weak, reused, and medium passwords all in one place — and fix them with one click.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Vault health score calculated from weak, reused, and medium passwords</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Identifies passwords used on more than one site</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> One-click Edit to fix any problem entry immediately</li>
+        </ul>
+      </div>
+      <div class="feature-visual animate-up delay-1">
+        <div class="visual-panel">
+          <div class="vp-header">
+            <div class="vp-dot" style="background:#fc605b"></div>
+            <div class="vp-dot" style="background:#fdbc40"></div>
+            <div class="vp-dot" style="background:#34c749"></div>
+          </div>
+          <div class="vp-body">
+            <div class="health-score-row">
+              <div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text3);margin-bottom:4px">Vault Health</div>
+                <div class="health-score-num">78</div>
+              </div>
+              <div class="health-grade">Good</div>
+            </div>
+            <div class="health-bar-bg"><div class="health-bar-fill"></div></div>
+            <div class="health-stats">
+              <div class="health-stat"><div class="health-dot" style="background:var(--danger)"></div><span><strong>2</strong> weak</span></div>
+              <div class="health-stat"><div class="health-dot" style="background:var(--warn)"></div><span><strong>1</strong> reused</span></div>
+              <div class="health-stat"><div class="health-dot" style="background:var(--text3)"></div><span><strong>9</strong> strong</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE: NOTES + TRASH -->
+<section class="section" style="background:var(--surface)">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:48px">
+      <span class="section-label">More Features</span>
+      <h2 class="section-title">Everything else you need</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start">
+
+      <div>
+        <div style="margin-bottom:24px">
+          <h3 style="font-size:20px;margin-bottom:10px">Secure Notes</h3>
+          <p style="font-size:15px;color:var(--text2);line-height:1.7">Not everything sensitive is a password. Store WiFi credentials, license keys, PINs, API keys, or any private text as an encrypted note — with a distinct visual style so notes are always easy to spot.</p>
+        </div>
+        <div class="note-item animate-up">
+          <div class="note-item-title">WiFi Password</div>
+          <div class="note-item-body">Network: HomeNetwork_5G<br>Password: SuperSecret2024!<br>Router IP: 192.168.1.1</div>
+        </div>
+        <div class="note-item animate-up delay-1">
+          <div class="note-item-title">VS Code License Key</div>
+          <div class="note-item-body">XXXXX-XXXXX-XXXXX-XXXXX-XXXXX<br>Registered to: alex@example.com</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="margin-bottom:24px">
+          <h3 style="font-size:20px;margin-bottom:10px">Trash & Restore</h3>
+          <p style="font-size:15px;color:var(--text2);line-height:1.7">Deleted entries don't disappear immediately. They move to a trash bin and are kept for 30 days, giving you time to restore anything deleted by mistake. After 30 days they're permanently purged.</p>
+        </div>
+        <div class="trash-item animate-up">
+          <div class="trash-item-row">
+            <div class="trash-item-icon">F</div>
+            <div class="trash-item-info">
+              <div class="trash-item-title">Facebook</div>
+              <div class="trash-item-sub">alex@example.com</div>
+            </div>
+            <div class="trash-actions-row">
+              <button class="trash-btn restore">Restore</button>
+              <button class="trash-btn">Delete</button>
+            </div>
+          </div>
+          <div class="trash-timer">⏱ 24 days left before permanent deletion</div>
+        </div>
+        <div class="trash-item animate-up delay-1">
+          <div class="trash-item-row">
+            <div class="trash-item-icon">S</div>
+            <div class="trash-item-info">
+              <div class="trash-item-title">Spotify</div>
+              <div class="trash-item-sub">alex@example.com</div>
+            </div>
+            <div class="trash-actions-row">
+              <button class="trash-btn restore">Restore</button>
+              <button class="trash-btn">Delete</button>
+            </div>
+          </div>
+          <div class="trash-timer">⏱ 18 days left before permanent deletion</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- MINI FEATURES -->
+<section class="section">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:48px">
+      <h2 class="section-title">The details matter too</h2>
+    </div>
+    <div class="mini-grid">
+      <div class="mini-card animate-up">
+        <div class="mini-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
+        <div class="mini-title">Custom Tags</div>
+        <div class="mini-desc">Create tags like Work, Personal, or Finance and filter your vault instantly.</div>
+      </div>
+      <div class="mini-card animate-up delay-1">
+        <div class="mini-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>
+        <div class="mini-title">One-Click Copy</div>
+        <div class="mini-desc">Copy passwords or usernames to your clipboard instantly with visual confirmation.</div>
+      </div>
+      <div class="mini-card animate-up delay-2">
+        <div class="mini-icon warm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <div class="mini-title">Instant Search</div>
+        <div class="mini-desc">Search across all entries by title or username in real time as you type.</div>
+      </div>
+      <div class="mini-card animate-up">
+        <div class="mini-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div class="mini-title">Secure Sessions</div>
+        <div class="mini-desc">Sessions expire when you close your browser tab. The encryption key is wiped from memory on logout.</div>
+      </div>
+      <div class="mini-card animate-up delay-1">
+        <div class="mini-icon stone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+        <div class="mini-title">Mobile Friendly</div>
+        <div class="mini-desc">Fully responsive with a mobile bottom navigation and slide-in drawer for a native app feel.</div>
+      </div>
+      <div class="mini-card animate-up delay-2">
+        <div class="mini-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="mini-title">Zero Knowledge</div>
+        <div class="mini-desc">The server stores only ciphertext. Your encryption key is never transmitted, stored, or logged.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section-sm">
+  <div class="container">
+    <div class="cta-box animate-up">
+      <h2>See it in action</h2>
+      <p>KeyNest is free and open source. No sign-up required to explore the app.</p>
+      <a href="../keynest/index.html" class="btn btn-accent btn-lg">Open KeyNest App</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo" style="margin-bottom:14px;display:inline-flex">
+          <div class="nav-logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
+          <span class="nav-logo-text">Key<em style="color:rgba(255,255,255,0.4)">Nest</em></span>
+        </a>
+        <p>A secure, open-source password manager built on client-side encryption.</p>
+      </div>
+      <div class="footer-col"><h4>Product</h4><ul><li><a href="features.html">Features</a></li><li><a href="security.html">Security</a></li><li><a href="../keynest/index.html">Open App</a></li></ul></div>
+      <div class="footer-col"><h4>Learn</h4><ul><li><a href="security.html#encryption">Encryption</a></li><li><a href="security.html#architecture">Architecture</a></li><li><a href="security.html#faq">FAQ</a></li></ul></div>
+      <div class="footer-col"><h4>More</h4><ul><li><a href="https://github.com/Ayoub81A/keynest" target="_blank">GitHub</a></li><li><a href="#">Changelog</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 KeyNest. MIT License.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
