@@ -35,13 +35,13 @@
       <div class="auth-field">
         <label>Email</label>
         <input id="auth-email" type="email" placeholder="you@example.com"
-          onkeydown="if(event.key==='Enter')submitAuth()" />
+          onkeydown="if(event.key==='Enter')document.getElementById('auth-submit-btn').click()" />
       </div>
       <div class="auth-field">
         <label>Password</label>
         <div class="auth-pw-wrap">
           <input id="auth-password" type="password" placeholder="Enter your password"
-            onkeydown="if(event.key==='Enter')submitAuth()"
+            onkeydown="if(event.key==='Enter')document.getElementById('auth-submit-btn').click()"
             oninput="updateAuthStrength()" />
           <button class="auth-pw-eye" onclick="toggleAuthPw()" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">

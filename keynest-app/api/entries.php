@@ -75,10 +75,10 @@ if ($resource === 'entries') {
         if (!$entry) jsonError('Entry not found.', 404);
 
         $db->beginTransaction();
-        $stmt = $db->prepare('INSERT INTO trash (id, user_id, type, ciphertext) VALUES (?, ?, ?, ?)');
+        $stmt = $db->prepare('INSERT INTO trash (id, user_id, type, ciphertext) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE type = VALUES(type), ciphertext = VALUES(ciphertext), deleted_at = CURRENT_TIMESTAMP');
         $stmt->execute([$entry['id'], $user['id'], $entry['type'], $entry['ciphertext']]);
-        $stmt = $db->prepare('DELETE FROM entries WHERE id = ?');
-        $stmt->execute([$id]);
+        $stmt = $db->prepare('DELETE FROM entries WHERE id = ? AND user_id = ?');
+        $stmt->execute([$id, $user['id']]);
         $db->commit();
 
         jsonResponse(['ok' => true]);
@@ -108,10 +108,10 @@ if ($resource === 'trash') {
         if (!$item) jsonError('Item not found.', 404);
 
         $db->beginTransaction();
-        $stmt = $db->prepare('INSERT INTO entries (id, user_id, type, ciphertext) VALUES (?, ?, ?, ?)');
+        $stmt = $db->prepare('INSERT INTO entries (id, user_id, type, ciphertext) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE type = VALUES(type), ciphertext = VALUES(ciphertext)');
         $stmt->execute([$item['id'], $user['id'], $item['type'], $item['ciphertext']]);
-        $stmt = $db->prepare('DELETE FROM trash WHERE id = ?');
-        $stmt->execute([$id]);
+        $stmt = $db->prepare('DELETE FROM trash WHERE id = ? AND user_id = ?');
+        $stmt->execute([$id, $user['id']]);
         $db->commit();
 
         jsonResponse(['ok' => true]);

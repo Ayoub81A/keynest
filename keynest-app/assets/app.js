@@ -23,6 +23,11 @@ const APP_VERSION = 'v1_php';
 
 // ── BOOT ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  // Check secure context for Web Crypto API
+  if (typeof window !== 'undefined' && !window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+    showAuthError('Web Crypto API requires a secure context (HTTPS or localhost). If running on a local network, please use localhost or enable HTTPS.');
+  }
+
   // Clear stale sessions
   if (sessionStorage.getItem('kn_version') !== APP_VERSION) {
     sessionStorage.clear();
@@ -36,8 +41,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       // (key is never stored — this is by design)
       showResumeScreen(session);
     }
-  } catch {
-    // Not authenticated — show login
+  } catch (err) {
+    // If backend or DB is down, alert the user rather than failing silently
+    if (err && err.message && (err.message.includes('Database') || err.message.includes('Network') || err.message.includes('XAMPP'))) {
+      showAuthError(err.message);
+    }
   }
 });
 
@@ -281,14 +289,14 @@ function renderSidebar() {
   };
 
   const tagsHtml = allTags.map(t => `
-    <div class="sidebar-item ${activeView===t.name?'active':''}" onclick="setView('${esc(t.name)}')">
+    <div class="sidebar-item ${activeView===t.name?'active':''}" onclick="setView('${escJs(t.name)}')">
       <div class="si-left">
         <div class="si-icon">${icons.tag}</div>
         <span class="si-label">${esc(t.name)}</span>
       </div>
       <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
         <span class="sidebar-count">${tagCounts[t.name]||0}</span>
-        <button onclick="event.stopPropagation();deleteTag(${t.id},'${esc(t.name)}')"
+        <button onclick="event.stopPropagation();deleteTag(${t.id},'${escJs(t.name)}')"
           style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;line-height:1;padding:2px 3px;border-radius:4px;transition:color 0.12s,background 0.12s"
           onmouseover="this.style.color='var(--danger)';this.style.background='var(--danger-bg)'"
           onmouseout="this.style.color='var(--text3)';this.style.background='none'"
@@ -437,7 +445,7 @@ function renderPwCard(e, i) {
         <button class="icon-btn" title="Edit" onclick="openEdit('${e.id}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
-        <button class="icon-btn del" title="Move to trash" onclick="askTrash('${e.id}','${esc(e.site).replace(/'/g,"\\'")}')">
+        <button class="icon-btn del" title="Move to trash" onclick="askTrash('${e.id}','${escJs(e.site)}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         </button>
       </div>
@@ -474,7 +482,7 @@ function renderNoteCard(e, i) {
         <button class="icon-btn" title="Edit" onclick="openEdit('${e.id}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
-        <button class="icon-btn del" title="Move to trash" onclick="askTrash('${e.id}','${esc(e.title||'Note').replace(/'/g,"\\'")}')">
+        <button class="icon-btn del" title="Move to trash" onclick="askTrash('${e.id}','${escJs(e.title||'Note')}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         </button>
       </div>
@@ -528,16 +536,43 @@ function renderGenerator(wrap) {
 }
 
 function generatePassword() {
-  const len = parseInt(document.getElementById('gen-length')?.value || genOpts.length);
-  let chars = '';
-  if (genOpts.upper) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  if (genOpts.lower) chars += 'abcdefghijklmnopqrstuvwxyz';
-  if (genOpts.nums)  chars += '0123456789';
-  if (genOpts.syms)  chars += '!@#$%^&*()-_=+[]{}|;:,.<>?';
-  if (!chars) return;
-  const arr = new Uint32Array(len);
-  crypto.getRandomValues(arr);
-  const pw = Array.from(arr).map(n => chars[n % chars.length]).join('');
+  const len = parseInt(document.getElementById('gen-length')?.value || genOpts.length) || 16;
+  const sets = [];
+  if (genOpts.upper) sets.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+  if (genOpts.lower) sets.push('abcdefghijklmnopqrstuvwxyz');
+  if (genOpts.nums)  sets.push('0123456789');
+  if (genOpts.syms)  sets.push('!@#$%^&*()-_=+[]{}|;:,.<>?');
+  if (!sets.length) sets.push('abcdefghijklmnopqrstuvwxyz');
+
+  const allChars = sets.join('');
+  const result = [];
+
+  // Guarantee at least 1 character from each selected set
+  sets.forEach(s => {
+    const rand = new Uint32Array(1);
+    crypto.getRandomValues(rand);
+    result.push(s[rand[0] % s.length]);
+  });
+
+  // Fill the remaining length
+  const remaining = Math.max(0, len - result.length);
+  if (remaining > 0) {
+    const randArr = new Uint32Array(remaining);
+    crypto.getRandomValues(randArr);
+    for (let i = 0; i < remaining; i++) {
+      result.push(allChars[randArr[i] % allChars.length]);
+    }
+  }
+
+  // Cryptographic Fisher-Yates shuffle
+  for (let i = result.length - 1; i > 0; i--) {
+    const rand = new Uint32Array(1);
+    crypto.getRandomValues(rand);
+    const j = rand[0] % (i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+
+  const pw = result.join('');
   const el = document.getElementById('gen-pw-display');
   if (el) el.textContent = pw;
   return pw;
@@ -668,7 +703,7 @@ function renderTrash(wrap, q) {
             <button class="icon-btn restore" onclick="restoreEntry('${e.id}')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.07"/></svg>
             </button>
-            <button class="icon-btn del" onclick="askPermDelete('${e.id}','${esc(name).replace(/'/g,"\\'")}')">
+            <button class="icon-btn del" onclick="askPermDelete('${e.id}','${escJs(name)}')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
@@ -850,7 +885,7 @@ function renderTagChips(filter) {
     return;
   }
   el.innerHTML = visible.map(t => `
-    <div class="tag-chip ${selectedTags.includes(t.name)?'selected':''}" onclick="toggleTag('${esc(t.name)}')">
+    <div class="tag-chip ${selectedTags.includes(t.name)?'selected':''}" onclick="toggleTag('${escJs(t.name)}')">
       ${esc(t.name)}${selectedTags.includes(t.name)?' <span class="chip-x">×</span>':''}
     </div>`).join('');
 }
@@ -867,12 +902,16 @@ async function addTagFromInput() {
   const name = inp.value.trim();
   if (!name) return;
   try {
-    if (!allTags.find(t => t.name === name)) {
+    const existing = allTags.find(t => t.name.toLowerCase() === name.toLowerCase());
+    let targetName = name;
+    if (!existing) {
       const tag = await API.tags.create(name);
       allTags.push(tag);
       renderSidebar();
+    } else {
+      targetName = existing.name;
     }
-    if (!selectedTags.includes(name)) selectedTags.push(name);
+    if (!selectedTags.includes(targetName)) selectedTags.push(targetName);
     inp.value = '';
     renderTagChips();
   } catch (err) {
@@ -893,7 +932,7 @@ async function createSidebarTag() {
   const name = inp?.value.trim();
   if (!name) return;
   try {
-    if (!allTags.find(t => t.name === name)) {
+    if (!allTags.find(t => t.name.toLowerCase() === name.toLowerCase())) {
       const tag = await API.tags.create(name);
       allTags.push(tag);
     }
@@ -911,11 +950,36 @@ async function deleteTag(id, name) {
   try {
     await API.tags.remove(id);
     allTags = allTags.filter(t => t.id !== id);
-    // Remove tag from all entries in memory (no re-encrypt needed for display)
+
+    // Identify entries that contain this tag
+    const affected = entries.filter(e => (e.tags || []).includes(name));
+
+    // Remove tag from entries in memory
     entries = entries.map(e => ({
       ...e,
       tags: (e.tags||[]).filter(t => t !== name)
     }));
+
+    // Re-encrypt and persist affected entries in the background so the deleted tag does not reappear upon reload
+    for (const e of affected) {
+      try {
+        const cleanObj = {
+          id: e.id,
+          type: e.type,
+          site: e.site || '',
+          username: e.username || '',
+          password: e.password || '',
+          title: e.title || '',
+          body: e.body || '',
+          tags: (e.tags || []).filter(t => t !== name)
+        };
+        const ciphertext = await Crypto.encrypt(encKey, cleanObj);
+        await API.entries.update(e.id, ciphertext);
+      } catch (syncErr) {
+        console.warn('Tag deletion entry sync warning:', syncErr);
+      }
+    }
+
     renderSidebar();
     renderMain();
     showToast(`Tag "${name}" deleted`);
@@ -1002,7 +1066,23 @@ function uid() {
   }
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escJs(s) {
+  return String(s ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/</g, '\\x3c')
+    .replace(/>/g, '\\x3e');
+}
 
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { closeModal(); closeConfirm(); } });
 
@@ -1026,6 +1106,14 @@ function exportVault() {
     showToast('Vault is empty. Nothing to export.');
     return;
   }
+  confirmCallback = () => doExportVault();
+  document.getElementById('confirm-title').textContent = 'Export unencrypted vault?';
+  document.getElementById('confirm-body').textContent = 'This downloads all your stored passwords and notes as an unencrypted JSON file. Anyone with access to that file will be able to read them in plain text. Export only to a secure location.';
+  document.getElementById('confirm-action-btn').textContent = 'Export JSON';
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+function doExportVault() {
   const payload = {
     app: 'KeyNest',
     version: '1.0',
@@ -1078,7 +1166,7 @@ function importVault() {
 
       let count = 0;
       for (const item of items) {
-        if (!item.type) continue;
+        if (!item || (!item.type && !item.site && !item.title)) continue;
         const entryId = uid();
         const cleanEntry = {
           id: entryId,
@@ -1090,10 +1178,14 @@ function importVault() {
           body: item.body || '',
           tags: Array.isArray(item.tags) ? item.tags : []
         };
-        const ciphertext = await Crypto.encrypt(encKey, cleanEntry);
-        const row = await API.entries.create(cleanEntry.id, cleanEntry.type, ciphertext);
-        entries.push({ ...cleanEntry, _dbId: row.id });
-        count++;
+        try {
+          const ciphertext = await Crypto.encrypt(encKey, cleanEntry);
+          const row = await API.entries.create(cleanEntry.id, cleanEntry.type, ciphertext);
+          entries.push({ ...cleanEntry, _dbId: row.id });
+          count++;
+        } catch (entryErr) {
+          console.warn('Failed to import entry:', cleanEntry, entryErr);
+        }
       }
 
       // Import tags

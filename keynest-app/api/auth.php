@@ -47,8 +47,9 @@ switch ($action) {
         $stmt = $db->prepare('INSERT INTO users (id, email, password, salt) VALUES (?, ?, ?, ?)');
         $stmt->execute([$id, $email, $hash, $salt]);
 
-        // Start session
+        // Start session and prevent session fixation
         startSession();
+        session_regenerate_id(true);
         $_SESSION['user_id']    = $id;
         $_SESSION['user_email'] = $email;
 
@@ -80,6 +81,7 @@ switch ($action) {
         }
 
         startSession();
+        session_regenerate_id(true);
         $_SESSION['user_id']    = $user['id'];
         $_SESSION['user_email'] = $user['email'];
 

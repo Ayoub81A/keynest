@@ -37,6 +37,7 @@ function startSession(): void {
     if (session_status() === PHP_SESSION_NONE) {
         if (!headers_sent()) {
             session_set_cookie_params([
+                'path'     => '/',
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);
@@ -80,8 +81,23 @@ function generateUUID(): string {
     return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 }
 
+// Global uncaught exception handler to return clean JSON
+set_exception_handler(function (Throwable $e) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => $e->getMessage()]);
+    exit;
+});
+
 // CORS headers for local development
-header('Access-Control-Allow-Origin: *');
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin) {
+    header("Access-Control-Allow-Origin: $origin");
+    header('Access-Control-Allow-Credentials: true');
+} else {
+    header('Access-Control-Allow-Origin: *');
+}
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { exit; }
+
