@@ -149,12 +149,16 @@
 }
 .faq-item:first-child { border-top: 1px solid var(--border); }
 .faq-q {
-  font-size: 16px; font-weight: 600; margin-bottom: 10px;
-  display: flex; align-items: start; justify-content: space-between; gap: 16px;
-  cursor: pointer;
+  font-size: 16px; font-weight: 600; margin-bottom: 0;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  cursor: pointer; user-select: none;
+  transition: color 0.15s;
 }
-.faq-q svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--text3); margin-top: 2px; }
-.faq-a { font-size: 14px; color: var(--text2); line-height: 1.75; }
+.faq-q:hover { color: var(--accent); }
+.faq-q svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--text3); transition: transform 0.25s ease, color 0.2s ease; }
+.faq-item.open .faq-q svg { transform: rotate(45deg); color: var(--accent); }
+.faq-a { font-size: 14px; color: var(--text2); line-height: 1.75; display: none; margin-top: 12px; animation: fadeIn 0.25s ease; }
+.faq-item.open .faq-a { display: block; }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
@@ -185,7 +189,7 @@
     </ul>
     <div class="nav-cta">
       <a href="features.html" class="btn btn-outline btn-sm">Features</a>
-      <a href="../keynest/index.html" class="btn btn-dark btn-sm">Open App</a>
+      <a href="../keynest-app/index.html" class="btn btn-dark btn-sm">Open App</a>
     </div>
   </div>
 </nav>
@@ -543,7 +547,7 @@
       <p>Don't take our word for it — read the source code and audit the encryption yourself.</p>
       <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
         <a href="https://github.com/Ayoub81A/keynest" target="_blank" class="btn btn-accent btn-lg">View on GitHub</a>
-        <a href="../keynest/index.html" class="btn btn-lg" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2)">Open App</a>
+        <a href="../keynest-app/index.html" class="btn btn-lg" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2)">Open App</a>
       </div>
     </div>
   </div>
@@ -556,11 +560,11 @@
       <div class="footer-brand">
         <a href="index.html" class="nav-logo" style="margin-bottom:14px;display:inline-flex">
           <div class="nav-logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
-          <span class="nav-logo-text">Key<em style="color:rgba(255,255,255,0.4)">Nest</em></span>
+          <span class="nav-logo-text">Key<em style="color:rgba(255,255,255,0.6)">Nest</em></span>
         </a>
         <p>A secure, open-source password manager built on client-side encryption.</p>
       </div>
-      <div class="footer-col"><h4>Product</h4><ul><li><a href="features.html">Features</a></li><li><a href="security.html">Security</a></li><li><a href="../keynest/index.html">Open App</a></li></ul></div>
+      <div class="footer-col"><h4>Product</h4><ul><li><a href="features.html">Features</a></li><li><a href="security.html">Security</a></li><li><a href="../keynest-app/index.html">Open App</a></li></ul></div>
       <div class="footer-col"><h4>Learn</h4><ul><li><a href="#encryption">Encryption</a></li><li><a href="#architecture">Architecture</a></li><li><a href="#faq">FAQ</a></li></ul></div>
       <div class="footer-col"><h4>More</h4><ul><li><a href="https://github.com/Ayoub81A/keynest" target="_blank">GitHub</a></li><li><a href="#">Changelog</a></li></ul></div>
     </div>
@@ -571,6 +575,13 @@
 </footer>
 
 <script>
+// FAQ Accordion
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.closest('.faq-item');
+    item.classList.toggle('open');
+  });
+});
 
 // Highlight active section in sticky nav
 const sections = ['encryption','architecture','tech','comparison','faq'];

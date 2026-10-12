@@ -723,7 +723,7 @@ function buildModalBody(type, e) {
       <div class="field">
         <label>Password</label>
         <div class="pw-input-wrap">
-          <input id="f-pw" type="password" placeholder="Enter password" oninput="updateModalStrength()" style="padding-right:72px" />
+          <input id="f-pw" type="password" placeholder="Enter password" oninput="updateStrength()" style="padding-right:72px" />
           <button class="pw-toggle" type="button" onclick="toggleModalPw()" style="right:36px">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
@@ -983,11 +983,15 @@ document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { closeMod
 
 
 function fillGeneratedPw() {
-  const pw = generatePassword(genOpts);
+  const pw = generatePassword();
   const input = document.getElementById('f-pw');
   if (!input) return;
   input.value = pw;
   input.type = 'text';
-  updateModalStrength();
+  updateStrength();
   showToast('Password generated!');
+}
+
+function updateModalStrength() {
+  updateStrength();
 }

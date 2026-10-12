@@ -91,7 +91,6 @@ nav {
   font-weight: 600;
   letter-spacing: -0.3px;
   color: var(--text);
-  word-spacing: -2;
   white-space: nowrap; 
 }
 
@@ -282,3 +281,54 @@ footer {
 .delay-2 { animation-delay: 0.2s; }
 .delay-3 { animation-delay: 0.3s; }
 .delay-4 { animation-delay: 0.4s; }
+
+/* ── RESPONSIVE BASE ── */
+@media (max-width: 768px) {
+  .nav-inner {
+    height: auto;
+    padding: 14px 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .nav-links {
+    gap: 18px;
+  }
+  .nav-cta {
+    gap: 8px;
+  }
+  .btn-sm {
+    padding: 7px 14px;
+    font-size: 12px;
+  }
+  .footer-top {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .nav-inner {
+    justify-content: center;
+    text-align: center;
+  }
+  .nav-links {
+    width: 100%;
+    justify-content: center;
+    gap: 16px;
+  }
+  .nav-cta {
+    width: 100%;
+    justify-content: center;
+  }
+  .footer-top {
+    grid-template-columns: 1fr;
+  }
+}

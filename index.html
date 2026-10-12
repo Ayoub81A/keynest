@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KeyNest — Secure Password Manager</title>
+  <meta http-equiv="refresh" content="0; url=keynest-site/index.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #f7f5f2;
+      color: #1c1917;
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .gateway-card {
+      background: #ffffff;
+      border: 1px solid #e4dfd8;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Lora', serif;
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #1c1917;
+    }
+    .logo-mark {
+      width: 38px;
+      height: 38px;
+      background: #1c1917;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+    }
+    .logo span { color: #1c4ed8; }
+    p {
+      color: #78716c;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn-dark {
+      background: #1c1917;
+      color: #fff;
+    }
+    .btn-dark:hover { background: #2d2926; }
+    .btn-outline {
+      background: none;
+      border: 1px solid #e4dfd8;
+      color: #78716c;
+    }
+    .btn-outline:hover {
+      background: #f0ede8;
+      color: #1c1917;
+    }
+  </style>
+</head>
+<body>
+  <div class="gateway-card">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+        </svg>
+      </div>
+      Key<span>Nest</span>
+    </div>
+    <p>Redirecting to the website... You can also jump directly to the vault application below.</p>
+    <div class="actions">
+      <a href="keynest-site/index.html" class="btn btn-dark">Open Marketing & Docs Site</a>
+      <a href="keynest-app/index.html" class="btn btn-outline">Open KeyNest App Directly</a>
+    </div>
+  </div>
+</body>
+</html>

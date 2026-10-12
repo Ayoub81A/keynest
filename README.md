@@ -55,27 +55,30 @@ No frameworks. No npm. No build tools. No external crypto libraries.
 ---
 
 ## 📁 Project Structure
-keynest/
-├── keynest-app/ # The vault application
-│ ├── index.html # App shell — all HTML structure
-│ ├── keynest.sql # Database schema, run once to set up
-│ ├── assets/
-│ │ ├── style.css # All styles
-│ │ ├── crypto.js # AES-256-GCM + PBKDF2 encryption module
-│ │ ├── api.js # All fetch() calls to the PHP backend
-│ │ └── app.js # Full vault UI logic
-│ └── api/
-│ ├── db.php # MySQL connection and shared helpers
-│ ├── auth.php # Register, login, logout, session check
-│ └── entries.php # Vault entries, trash, and tags CRUD
-│
-└── keynest-site/ # Marketing / info site
-├── index.html # Home page
-├── features.html # Features overview
-├── security.html # Security architecture details
-└── shared.css # Shared styles across all site pages
 
-text
+```text
+keynest/
+├── index.html         # Root gateway / redirect
+│
+├── keynest-app/       # The vault application
+│   ├── index.html     # App shell — all HTML structure
+│   ├── keynest.sql    # Database schema, run once to set up
+│   ├── assets/
+│   │   ├── style.css  # All vault styles & responsive rules
+│   │   ├── crypto.js  # AES-256-GCM + PBKDF2 encryption module
+│   │   ├── api.js     # All fetch() calls to the PHP backend
+│   │   └── app.js     # Full vault UI logic
+│   └── api/
+│       ├── db.php     # MySQL connection and shared helpers
+│       ├── auth.php   # Register, login, logout, session check
+│       └── entries.php# Vault entries, trash, and tags CRUD
+│
+└── keynest-site/      # Marketing / info site
+    ├── index.html     # Home page
+    ├── features.html  # Features overview
+    ├── security.html  # Security architecture details
+    └── style.css      # Shared marketing styles
+```
 
 ---
 
