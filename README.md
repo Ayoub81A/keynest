@@ -148,7 +148,7 @@ define('DB_NAME', 'keynest');
 - [x] Password health report
 - [x] Trash & restore with 30-day auto-purge
 - [x] Marketing / info site
-- [ ] Import / Export vault as encrypted JSON
+- [x] Import / Export vault as JSON backup
 - [ ] Favourite / pin entries
 - [ ] Password history per entry
 

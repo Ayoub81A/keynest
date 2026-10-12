@@ -111,24 +111,33 @@ async function submitAuth() {
 
 // Resume screen — shown when session exists but key isn't in memory
 function showResumeScreen(session) {
-  document.getElementById('auth-subtitle').textContent =
-    `Welcome back, ${session.email}. Enter your password to unlock your vault.`;
+  document.getElementById('auth-subtitle').innerHTML =
+    `Welcome back, <strong>${esc(session.email)}</strong>. Enter your password to unlock your vault.<br>` +
+    `<button type="button" onclick="logout()" style="background:none;border:none;color:var(--accent);font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;padding:0;margin-top:6px;text-decoration:underline">` +
+    `Not you? Sign in with a different account</button>`;
   document.getElementById('auth-email').value = session.email;
   switchAuthTab('login');
   document.getElementById('tab-login').style.display = 'none';
   document.getElementById('tab-register').style.display = 'none';
 
-  // Override submit to just derive key + load vault
+  // Override submit to verify password with server, derive key + load vault
   document.getElementById('auth-submit-btn').textContent = 'Unlock Vault';
   document.getElementById('auth-submit-btn').onclick = async () => {
     const password = document.getElementById('auth-password').value;
     if (!password) { showAuthError('Enter your password.'); return; }
+    const btn = document.getElementById('auth-submit-btn');
+    btn.textContent = 'Unlocking…';
+    btn.disabled = true;
     try {
-      encKey = await Crypto.deriveKey(password, session.salt);
-      currentUser = { id: session.id, email: session.email, salt: session.salt };
+      const user = await API.auth.login(session.email, password);
+      encKey = await Crypto.deriveKey(password, user.salt);
+      currentUser = { id: user.id, email: user.email, salt: user.salt };
       await initVault();
-    } catch {
-      showAuthError('Incorrect password.');
+    } catch (err) {
+      showAuthError(err.message || 'Incorrect password.');
+    } finally {
+      btn.textContent = 'Unlock Vault';
+      btn.disabled = false;
     }
   };
 }
@@ -189,8 +198,8 @@ async function initVault() {
 
     allTags = rawTags; // [{ id, name }]
 
-    // Seed demo data for brand new accounts
-    if (!entries.length && !trashItems.length) {
+    // Seed starter demo data only for completely new, empty accounts
+    if (rawEntries.length === 0 && rawTrash.length === 0 && rawTags.length === 0) {
       await seedDemoData();
     }
 
@@ -267,6 +276,8 @@ function renderSidebar() {
     trash:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
     health: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
     gen:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`,
+    export: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+    import: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
   };
 
   const tagsHtml = allTags.map(t => `
@@ -313,8 +324,17 @@ function renderSidebar() {
     <div class="sidebar-divider"></div>
     ${item('trash',     icons.trash,  'Trash',         trashItems.length, 'trash-item')}
     <div class="sidebar-divider"></div>
+    <div class="sidebar-section-title">Tools</div>
     ${item('health',    icons.health, 'Health',        null)}
     ${item('generator', icons.gen,    'Generator',     null)}
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-title">Backup</div>
+    <div class="sidebar-item" onclick="exportVault()" title="Export JSON backup">
+      <div class="si-left"><div class="si-icon">${icons.export}</div><span class="si-label">Export Vault</span></div>
+    </div>
+    <div class="sidebar-item" onclick="importVault()" title="Import JSON backup">
+      <div class="si-left"><div class="si-icon">${icons.import}</div><span class="si-label">Import Vault</span></div>
+    </div>
   `;
 
   document.getElementById('sidebar').innerHTML = html;
@@ -976,11 +996,15 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
 }
 
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function uid() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { closeModal(); closeConfirm(); } });
-
 
 function fillGeneratedPw() {
   const pw = generatePassword();
@@ -994,4 +1018,103 @@ function fillGeneratedPw() {
 
 function updateModalStrength() {
   updateStrength();
+}
+
+// ── BACKUP: EXPORT & IMPORT ────────────────────────────────
+function exportVault() {
+  if (!entries.length && !trashItems.length) {
+    showToast('Vault is empty. Nothing to export.');
+    return;
+  }
+  const payload = {
+    app: 'KeyNest',
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    user: currentUser ? currentUser.email : '',
+    entries: entries.map(e => ({
+      type: e.type,
+      site: e.site || '',
+      username: e.username || '',
+      password: e.password || '',
+      title: e.title || '',
+      body: e.body || '',
+      tags: e.tags || []
+    })),
+    tags: allTags.map(t => t.name)
+  };
+  const str = JSON.stringify(payload, null, 2);
+  const blob = new Blob([str], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `keynest-vault-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Vault backup downloaded!');
+}
+
+function importVault() {
+  if (!encKey) {
+    showToast('Please unlock your vault before importing.');
+    return;
+  }
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = async ev => {
+    const file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    try {
+      showToast('Importing backup…');
+      const text = await file.text();
+      const data = JSON.parse(text);
+      const items = Array.isArray(data.entries) ? data.entries : (Array.isArray(data) ? data : []);
+      if (!items.length) {
+        showToast('No entries found in file.');
+        return;
+      }
+
+      let count = 0;
+      for (const item of items) {
+        if (!item.type) continue;
+        const entryId = uid();
+        const cleanEntry = {
+          id: entryId,
+          type: item.type === 'note' ? 'note' : 'password',
+          site: item.site || '',
+          username: item.username || '',
+          password: item.password || '',
+          title: item.title || '',
+          body: item.body || '',
+          tags: Array.isArray(item.tags) ? item.tags : []
+        };
+        const ciphertext = await Crypto.encrypt(encKey, cleanEntry);
+        const row = await API.entries.create(cleanEntry.id, cleanEntry.type, ciphertext);
+        entries.push({ ...cleanEntry, _dbId: row.id });
+        count++;
+      }
+
+      // Import tags
+      if (Array.isArray(data.tags)) {
+        for (const tagName of data.tags) {
+          const name = String(tagName).trim();
+          if (name && !allTags.find(t => t.name.toLowerCase() === name.toLowerCase())) {
+            try {
+              const tag = await API.tags.create(name);
+              allTags.push(tag);
+            } catch {}
+          }
+        }
+      }
+
+      renderSidebar();
+      renderMain();
+      showToast(`Imported ${count} entries successfully!`);
+    } catch (err) {
+      showToast('Import failed: ' + (err.message || 'Invalid JSON file'));
+    }
+  };
+  input.click();
 }

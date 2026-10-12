@@ -9,13 +9,23 @@ const API = (() => {
   const BASE = './api';
 
   async function request(url, options = {}) {
-    const res = await fetch(url, {
-      credentials: 'same-origin',    // send PHP session cookie
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-      ...options,
-    });
+    let res;
+    try {
+      res = await fetch(url, {
+        credentials: 'same-origin',    // send PHP session cookie
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        ...options,
+      });
+    } catch {
+      throw new Error('Network error: Unable to reach server. Please ensure XAMPP is running.');
+    }
 
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error(`Server returned status ${res.status}.`);
+    }
 
     if (!res.ok) {
       throw new Error(data.error || `Request failed (${res.status})`);

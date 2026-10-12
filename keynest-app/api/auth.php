@@ -48,7 +48,7 @@ switch ($action) {
         $stmt->execute([$id, $email, $hash, $salt]);
 
         // Start session
-        session_start();
+        startSession();
         $_SESSION['user_id']    = $id;
         $_SESSION['user_email'] = $email;
 
@@ -79,7 +79,7 @@ switch ($action) {
             jsonError('Invalid email or password.', 401);
         }
 
-        session_start();
+        startSession();
         $_SESSION['user_id']    = $user['id'];
         $_SESSION['user_email'] = $user['email'];
 
@@ -93,7 +93,15 @@ switch ($action) {
 
     // ── LOGOUT ────────────────────────────────────────────────
     case 'logout': {
-        session_start();
+        startSession();
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params['path'], $params['domain'],
+                $params['secure'], $params['httponly']
+            );
+        }
         session_destroy();
         jsonResponse(['ok' => true]);
         break;
@@ -101,7 +109,7 @@ switch ($action) {
 
     // ── SESSION CHECK ─────────────────────────────────────────
     case 'check': {
-        session_start();
+        startSession();
         if (empty($_SESSION['user_id'])) {
             jsonResponse(['authenticated' => false]);
         }
@@ -112,6 +120,7 @@ switch ($action) {
         $user = $stmt->fetch();
 
         if (!$user) {
+            $_SESSION = [];
             session_destroy();
             jsonResponse(['authenticated' => false]);
         }

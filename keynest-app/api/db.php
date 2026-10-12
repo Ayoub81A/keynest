@@ -19,9 +19,11 @@ function getDB(): PDO {
                 PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES   => false,
+                PDO::MYSQL_ATTR_FOUND_ROWS   => true,
             ]);
         } catch (PDOException $e) {
             http_response_code(500);
+            header('Content-Type: application/json');
             echo json_encode(['error' => 'Database connection failed.']);
             exit;
         }
@@ -30,6 +32,18 @@ function getDB(): PDO {
 }
 
 // ── HELPERS ────────────────────────────────────────────────
+
+function startSession(): void {
+    if (session_status() === PHP_SESSION_NONE) {
+        if (!headers_sent()) {
+            session_set_cookie_params([
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+        }
+        session_start();
+    }
+}
 
 function jsonResponse(mixed $data, int $status = 200): void {
     http_response_code($status);
@@ -49,7 +63,7 @@ function getBody(): array {
 }
 
 function requireAuth(): array {
-    session_start();
+    startSession();
     if (empty($_SESSION['user_id'])) {
         jsonError('Unauthorized.', 401);
     }
