@@ -1,22 +1,29 @@
 # 🗝️ KeyNest — Password Manager
 
-A secure, full-stack password manager built with vanilla HTML, CSS, JavaScript, PHP, and MySQL. KeyNest stores your passwords encrypted — even the server cannot read them. Built as a portfolio project demonstrating real-world security practices including client-side AES-256-GCM encryption and PBKDF2 key derivation.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![PHP](https://img.shields.io/badge/PHP-8.0%2B-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![Security](https://img.shields.io/badge/Crypto-AES--256--GCM-success.svg)](keynest-site/security.html)
+[![Web Crypto](https://img.shields.io/badge/Web_Crypto_API-Zero--Knowledge-informational.svg)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
+
+A secure, zero-knowledge full-stack password manager built with vanilla HTML, CSS, JavaScript, PHP, and MySQL. KeyNest stores your passwords encrypted client-side — even the database server cannot decrypt them. Built as a portfolio project demonstrating real-world security practices including browser-side AES-256-GCM encryption and PBKDF2 key derivation.
 
 ---
 
 ## ✨ Features
 
-- **Authentication** — Register and sign in with email and password. Sessions handled server-side with PHP.
-- **Client-Side Encryption** — All vault entries are encrypted with AES-256-GCM in the browser before being sent to the server. The database stores only ciphertext — passwords are never readable server-side.
-- **Password Vault** — Add, edit, and delete password entries with site name, username, and password
-- **Secure Notes** — Store sensitive text like WiFi passwords, license keys, or PINs, fully encrypted
-- **Tags** — Organise entries with custom tags, create and delete them from the sidebar
-- **Password Generator** — Generate strong random passwords with configurable length and character sets (A–Z, a–z, 0–9, symbols). Also available inline when creating a new entry.
-- **Password Strength Indicator** — Real-time strength meter when entering passwords
-- **Password Health Report** — Overview of weak, reused, and medium-strength passwords with a vault health score
-- **Trash & Restore** — Deleted entries go to trash, auto-purge after 30 days, with restore and permanent delete
-- **Search** — Instantly filter entries by title or username
-- **Copy to Clipboard** — One-click copy for passwords and usernames
+- **Authentication** — Register and sign in with email and password. Protected with bcrypt hashing and session fixation defense.
+- **Client-Side Encryption** — All vault entries are encrypted with AES-256-GCM in the browser before transmission. The database stores only ciphertext.
+- **Password Vault** — Add, edit, and delete credentials with site name, username, and password.
+- **Secure Notes** — Store sensitive text like WiFi credentials, license keys, or recovery codes, fully encrypted.
+- **Tags & Categorization** — Organize entries with custom tags, synchronized in real time.
+- **Password Generator** — Cryptographically secure generator (Fisher-Yates shuffle) with guaranteed selection of enabled character classes (A–Z, a–z, 0–9, symbols). Available standalone and inline within the entry modal.
+- **Password Strength Indicator** — Real-time visual strength scoring as you type.
+- **Password Health Report** — Automated health assessment identifying weak, reused, and medium-strength passwords.
+- **Trash & Restore** — Soft-delete with a 30-day auto-purge safety window and instant restoration.
+- **Instant Search** — Fast, client-side filtering across entries by title, username, or note content.
+- **Copy to Clipboard** — One-click username and password copying with temporary visual confirmation.
+- **Import & Export** — Download vault backups as JSON or import existing JSON archives with automated schema validation.
+- **Marketing & Documentation Site** — Integrated static site detailing product features and security specifications.
 
 ---
 
@@ -27,7 +34,8 @@ A secure, full-stack password manager built with vanilla HTML, CSS, JavaScript, 
 | Password hashing | bcrypt (cost 12) via PHP `password_hash()` |
 | Key derivation | PBKDF2-SHA256, 310,000 iterations (NIST recommended) |
 | Vault encryption | AES-256-GCM via Web Crypto API |
-| Session management | PHP server-side sessions |
+| Session management | PHP server-side sessions with fixation protection (`session_regenerate_id`) |
+| Cookie security | HttpOnly, SameSite=Lax, path=/ |
 | Key storage | Never stored — derived in browser at login, wiped on logout |
 
 **Encryption flow:**
@@ -101,10 +109,11 @@ git clone https://github.com/Ayoub81A/keynest.git
 
 **2. Move to htdocs**
 
-Copy the entire `keynest` folder into your XAMPP htdocs directory:
-C:\xampp\htdocs\keynest
+Copy the entire `keynest` repository directory into your XAMPP `htdocs` folder:
 
-text
+```text
+C:\xampp\htdocs\keynest
+```
 
 **3. Start XAMPP**
 
@@ -132,8 +141,9 @@ define('DB_NAME', 'keynest');
 
 **6. Open the app**
 
+- **Root Gateway / Landing:** `http://localhost/keynest/`
 - **Vault app:** `http://localhost/keynest/keynest-app/`
-- **Info site:** `http://localhost/keynest/keynest-site/`
+- **Info & Security site:** `http://localhost/keynest/keynest-site/`
 
 ---
 
